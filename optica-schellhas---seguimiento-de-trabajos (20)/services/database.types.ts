@@ -4,7 +4,7 @@ export type Json =
   | boolean
   | null
   | { [key: string]: Json | undefined }
-  | any[]
+  | Json[]
 
 export enum Role {
   Admin = 'ADMIN',
