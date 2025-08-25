@@ -1,3 +1,4 @@
+
 import { Role, JobStatus, JobPriority, type User, type Job, type Announcement, type Database, type JobHistoryEntry, type Json } from './database.types.ts';
 import { supabase } from './supabaseClient.ts';
 
@@ -49,7 +50,7 @@ export const apiCreateJob = async (jobData: { id: string; description: string; b
             timestamp: now,
             status: JobStatus.PendingInBranch,
             updatedBy: jobData.branch_name,
-        }]
+        }] as unknown as Json,
     };
 
     const { data, error } = await supabase
@@ -78,7 +79,7 @@ export const apiUpdateJob = async (jobId: string, updates: Omit<Database['public
     if (!currentJob) throw new Error(`Job with id ${jobId} not found.`);
 
     const now = new Date().toISOString();
-    const newHistory = [...((currentJob.history as JobHistoryEntry[]) || [])];
+    const newHistory = [...((currentJob.history as unknown as JobHistoryEntry[]) || [])];
 
     if (updates.status && updates.status !== currentJob.status) {
         newHistory.push({
@@ -99,7 +100,7 @@ export const apiUpdateJob = async (jobId: string, updates: Omit<Database['public
     const updatePayload: Database['public']['Tables']['jobs']['Update'] = { 
         ...updates, 
         updated_at: now, 
-        history: newHistory
+        history: newHistory as unknown as Json,
     };
 
     const { data, error } = await supabase
@@ -127,7 +128,7 @@ export const apiBulkUpdateJobs = async (jobIds: string[], status: JobStatus, upd
         ...job,
         status,
         updated_at: now,
-        history: [...((job.history as JobHistoryEntry[]) || []), { timestamp: now, status, updatedBy: updatedBy.username }]
+        history: [...((job.history as unknown as JobHistoryEntry[]) || []), { timestamp: now, status, updatedBy: updatedBy.username }] as unknown as Json,
     }));
 
     const { data, error } = await supabase.from('jobs').upsert(jobsToUpdate).select();
